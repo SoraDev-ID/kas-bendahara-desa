@@ -1,0 +1,3 @@
+# Folder ini digunakan untuk menyimpan file database SQLite (kas.db).
+# File database dikecualikan dari git (lihat .gitignore).
+# Folder ini perlu ada agar aplikasi bisa membuat database saat pertama kali dijalankan.
