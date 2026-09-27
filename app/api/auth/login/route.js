@@ -27,7 +27,10 @@ export async function POST(request) {
 
     return Response.json({ user: session.user });
   } catch (err) {
-    console.error(err);
-    return Response.json({ error: 'Terjadi kesalahan server' }, { status: 500 });
+    console.error('Login error:', err);
+    return Response.json({ 
+      error: 'Terjadi kesalahan server',
+      detail: err?.message || String(err)
+    }, { status: 500 });
   }
 }

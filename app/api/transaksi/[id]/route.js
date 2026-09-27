@@ -56,19 +56,29 @@ export async function PUT(request, { params }) {
   let bukti_file = existing.bukti_file;
   if (buktiFile && buktiFile.size > 0) {
     // Hapus file lama
-    if (existing.bukti_file) {
+    if (existing.bukti_file && !existing.bukti_file.startsWith('data:')) {
       try {
         await unlink(path.join(process.cwd(), 'public', existing.bukti_file));
       } catch (_) {}
     }
-    const ext = buktiFile.name.split('.').pop();
-    const filename = `bukti_${Date.now()}.${ext}`;
-    const uploadDir = path.join(process.cwd(), 'public', 'uploads');
-    const { mkdirSync } = require('fs');
-    mkdirSync(uploadDir, { recursive: true });
-    const bytes = await buktiFile.arrayBuffer();
-    await writeFile(path.join(uploadDir, filename), Buffer.from(bytes));
-    bukti_file = `/uploads/${filename}`;
+    try {
+      const ext = buktiFile.name.split('.').pop();
+      const filename = `bukti_${Date.now()}.${ext}`;
+      const uploadDir = path.join(process.cwd(), 'public', 'uploads');
+      const { mkdirSync } = require('fs');
+      mkdirSync(uploadDir, { recursive: true });
+      const bytes = await buktiFile.arrayBuffer();
+      await writeFile(path.join(uploadDir, filename), Buffer.from(bytes));
+      bukti_file = `/uploads/${filename}`;
+    } catch (_) {
+      try {
+        const bytes = await buktiFile.arrayBuffer();
+        const base64 = Buffer.from(bytes).toString('base64');
+        bukti_file = `data:${buktiFile.type || 'image/jpeg'};base64,${base64}`;
+      } catch (_) {
+        bukti_file = null;
+      }
+    }
   }
 
   db.prepare(`
